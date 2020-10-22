@@ -43,9 +43,12 @@ namespace Employee.Controllers
         }
 
         // GET: Employees/Create
-        public IActionResult Create()
+        public IActionResult AddOrEdit(int id=0)
         {
-            return View();
+            if(id==0)
+            return View(new Employees());
+            else
+                return View(_context.Employees.Find(id));
         }
 
         // POST: Employees/Create
@@ -53,63 +56,15 @@ namespace Employee.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("EmployeeId,FullName,EmpCode,Position,OfficeLocation")] Employees employees)
+        public async Task<IActionResult> AddOrEdit([Bind("EmployeeId,FullName,EmpCode,Position,OfficeLocation")] Employees employees)
         {
             if (ModelState.IsValid)
             {
+                if(employees.EmployeeId == 0)
                 _context.Add(employees);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
-            }
-            return View(employees);
-        }
-
-        // GET: Employees/Edit/5
-        public async Task<IActionResult> Edit(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var employees = await _context.Employees.FindAsync(id);
-            if (employees == null)
-            {
-                return NotFound();
-            }
-            return View(employees);
-        }
-
-        // POST: Employees/Edit/5
-        // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
-        // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("EmployeeId,FullName,EmpCode,Position,OfficeLocation")] Employees employees)
-        {
-            if (id != employees.EmployeeId)
-            {
-                return NotFound();
-            }
-
-            if (ModelState.IsValid)
-            {
-                try
-                {
+                else
                     _context.Update(employees);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!EmployeesExists(employees.EmployeeId))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
+                await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
             return View(employees);
@@ -118,35 +73,10 @@ namespace Employee.Controllers
         // GET: Employees/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var employees = await _context.Employees
-                .FirstOrDefaultAsync(m => m.EmployeeId == id);
-            if (employees == null)
-            {
-                return NotFound();
-            }
-
-            return View(employees);
-        }
-
-        // POST: Employees/Delete/5
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
-        {
-            var employees = await _context.Employees.FindAsync(id);
-            _context.Employees.Remove(employees);
+            var employee =await _context.Employees.FindAsync(id);
+            _context.Employees.Remove(employee);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
-        }
-
-        private bool EmployeesExists(int id)
-        {
-            return _context.Employees.Any(e => e.EmployeeId == id);
         }
     }
 }
